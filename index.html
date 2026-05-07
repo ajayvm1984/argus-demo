@@ -1,0 +1,2368 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Argus — Network Vision · A Meridian Cyber Product</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700&family=JetBrains+Mono:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root,
+  [data-theme="dark"] {
+    --bg: #0a0d12;
+    --bg-2: #0c1015;
+    --bg-3: #0f1319;
+    --surface: #131820;
+    --surface-2: #181e28;
+    --surface-3: #1f2632;
+    --border: #1f2632;
+    --border-light: #2a3242;
+    --text: #e8ebf0;
+    --text-dim: #8b93a3;
+    --text-faint: #545b6a;
+    --accent: #d4ff3f;
+    --accent-soft: rgba(212, 255, 63, 0.08);
+    --accent-glow: rgba(212, 255, 63, 0.35);
+    --healthy: #5eead4;
+    --healthy-soft: rgba(94, 234, 212, 0.1);
+    --warn: #fbbf24;
+    --warn-soft: rgba(251, 191, 36, 0.1);
+    --critical: #f43f5e;
+    --critical-soft: rgba(244, 63, 94, 0.1);
+    --info: #7dd3fc;
+    --info-soft: rgba(125, 211, 252, 0.1);
+    --grid: rgba(255,255,255,0.025);
+    --shadow: 0 4px 20px rgba(0,0,0,0.3);
+  }
+
+  [data-theme="light"] {
+    --bg: #f0f2f5;
+    --bg-2: #ffffff;
+    --bg-3: #f8f9fb;
+    --surface: #ffffff;
+    --surface-2: #f4f6f8;
+    --surface-3: #e9ecf0;
+    --border: #d4d9e0;
+    --border-light: #b7bec8;
+    --text: #1a1f2c;
+    --text-dim: #4a5060;
+    --text-faint: #707888;
+    --accent: #5b8a00;
+    --accent-soft: rgba(91, 138, 0, 0.12);
+    --accent-glow: rgba(91, 138, 0, 0.25);
+    --healthy: #0d9488;
+    --healthy-soft: rgba(13, 148, 136, 0.12);
+    --warn: #b45309;
+    --warn-soft: rgba(180, 83, 9, 0.12);
+    --critical: #dc2626;
+    --critical-soft: rgba(220, 38, 38, 0.12);
+    --info: #0284c7;
+    --info-soft: rgba(2, 132, 199, 0.12);
+    --grid: rgba(0,0,0,0.04);
+    --shadow: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter Tight', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* === Concept Banner === */
+  .concept-banner {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    background: linear-gradient(90deg, var(--accent-soft), transparent);
+    border-bottom: 1px solid var(--border-light);
+    padding: 6px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    backdrop-filter: blur(20px);
+  }
+  .concept-banner .left {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--text-dim);
+  }
+  .concept-banner .dot {
+    width: 6px; height: 6px;
+    background: var(--accent);
+    border-radius: 50%;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.8); }
+  }
+  .concept-banner .right {
+    color: var(--text-faint);
+    font-size: 10px;
+  }
+
+  /* === Layout === */
+  .layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    min-height: 100vh;
+    padding-top: 30px;
+  }
+
+  /* === Sidebar === */
+  .sidebar {
+    background: var(--bg-2);
+    border-right: 1px solid var(--border);
+    padding: 28px 0;
+    position: fixed;
+    top: 30px;
+    left: 0;
+    width: 240px;
+    height: calc(100vh - 30px);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+  }
+  .brand {
+    padding: 0 24px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .brand-logo {
+    width: 36px;
+    height: 22px;
+    background: var(--bg);
+    border: 1.5px solid var(--accent);
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .brand-logo::before {
+    content: '';
+    position: absolute;
+    width: 13px; height: 9px;
+    background: var(--accent);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .brand-logo::after {
+    content: '';
+    position: absolute;
+    width: 6px; height: 4px;
+    background: var(--bg);
+    border-radius: 50%;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.1;
+  }
+  .brand-text .name {
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: -0.5px;
+  }
+  .brand-text .product {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 1px;
+    margin-top: 2px;
+  }
+
+  .nav {
+    padding: 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+  }
+  .nav-section {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 2px;
+    padding: 14px 12px 8px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 13.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+    user-select: none;
+  }
+  .nav-item:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+  .nav-item.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: var(--border-light);
+  }
+  .nav-item .icon {
+    width: 16px;
+    flex-shrink: 0;
+    opacity: 0.85;
+  }
+  .nav-item .badge {
+    margin-left: auto;
+    background: var(--critical);
+    color: white;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  [data-theme="light"] .nav-item .badge { color: white; }
+  .nav-item.active .icon { opacity: 1; }
+
+  .sidebar-footer {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 11px;
+    color: var(--text-faint);
+  }
+  .client-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+    flex: 1;
+  }
+  .client-info .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--text-faint);
+  }
+  .client-info .name {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 12px;
+  }
+
+  /* === Main content === */
+  .main {
+    grid-column: 2;
+    padding: 24px 32px 80px;
+  }
+
+  /* === User menu === */
+  .user-menu {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px 6px 6px;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    position: relative;
+    user-select: none;
+  }
+  .user-menu:hover {
+    border-color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .user-avatar {
+    width: 28px;
+    height: 28px;
+    background: var(--accent);
+    color: var(--bg);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  [data-theme="light"] .user-avatar {
+    background: var(--accent);
+    color: white;
+  }
+  .user-avatar.lg {
+    width: 40px;
+    height: 40px;
+    font-size: 13px;
+    border-radius: 8px;
+  }
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+  }
+  .user-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+  .user-role {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 1px;
+    margin-top: 1px;
+  }
+  .user-chevron {
+    width: 14px;
+    height: 14px;
+    color: var(--text-faint);
+    transition: transform 0.2s;
+    flex-shrink: 0;
+  }
+  .user-menu.open .user-chevron {
+    transform: rotate(180deg);
+  }
+  .user-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    width: 260px;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: all 0.2s ease;
+    z-index: 100;
+    overflow: hidden;
+  }
+  [data-theme="light"] .user-dropdown {
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12), 0 2px 6px rgba(0,0,0,0.06);
+  }
+  .user-menu.open .user-dropdown {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+  .user-dropdown-head {
+    padding: 16px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .user-dropdown-head .user-name {
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .user-email {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+  .user-dropdown-list {
+    padding: 6px;
+  }
+  .user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 10px;
+    border-radius: 6px;
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
+    transition: background 0.12s ease;
+  }
+  .user-dropdown-item svg {
+    width: 14px;
+    height: 14px;
+    color: var(--text-dim);
+  }
+  .user-dropdown-item:hover {
+    background: var(--surface-2);
+    color: var(--accent);
+  }
+  .user-dropdown-item:hover svg {
+    color: var(--accent);
+  }
+  .user-dropdown-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 4px 0;
+  }
+
+  /* === Topbar === */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  .topbar-left h1 {
+    font-size: 26px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
+  }
+  .topbar-left .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 1px;
+  }
+  .topbar-left .breadcrumb .accent { color: var(--accent); }
+  .topbar-right {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+  .btn {
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .btn:hover {
+    background: var(--accent-soft);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .btn .icon { width: 14px; height: 14px; }
+
+  /* === Section views === */
+  .view { display: none; }
+  .view.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* === Stats grid === */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px; height: 100%;
+    background: var(--accent);
+  }
+  .stat-card.healthy::before { background: var(--healthy); }
+  .stat-card.warn::before { background: var(--warn); }
+  .stat-card.critical::before { background: var(--critical); }
+  .stat-card .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+  }
+  .stat-card .value {
+    font-size: 30px;
+    font-weight: 600;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+  .stat-card .delta {
+    margin-top: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .stat-card .delta .up { color: var(--healthy); }
+  .stat-card .delta .down { color: var(--critical); }
+
+  /* === Cards & panels === */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  [data-theme="light"] .panel { box-shadow: var(--shadow); }
+  [data-theme="light"] .stat-card { box-shadow: var(--shadow); }
+  [data-theme="light"] .pulse-panel { box-shadow: var(--shadow); }
+  [data-theme="light"] .map-panel { box-shadow: var(--shadow); }
+  [data-theme="light"] .attention-panel { box-shadow: var(--shadow); }
+  [data-theme="light"] .report-card { box-shadow: var(--shadow); }
+  [data-theme="light"] .site-card { box-shadow: 0 1px 2px rgba(0,0,0,0.04); }
+  .panel-head {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-head h3 {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -0.2px;
+  }
+  .panel-head .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 1px;
+  }
+  .panel-body { padding: 20px; }
+  .panel-body.no-pad { padding: 0; }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+
+  /* === Pulse panel (waveform) === */
+  .pulse-panel {
+    grid-column: span 2;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .pulse-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+  }
+  .pulse-status {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .pulse-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: var(--warn);
+    box-shadow: 0 0 0 0 var(--warn);
+    animation: pulseRing 2s infinite;
+  }
+  @keyframes pulseRing {
+    0% { box-shadow: 0 0 0 0 var(--warn-soft); }
+    70% { box-shadow: 0 0 0 8px transparent; }
+    100% { box-shadow: 0 0 0 0 transparent; }
+  }
+  .pulse-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-faint);
+    letter-spacing: 2px;
+  }
+  .pulse-status .state {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--warn);
+  }
+  .pulse-meta {
+    text-align: right;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .pulse-meta .big {
+    font-size: 14px; color: var(--text);
+    font-weight: 600;
+  }
+  .waveform {
+    height: 120px;
+    position: relative;
+  }
+  .waveform svg {
+    width: 100%; height: 100%;
+  }
+
+  /* === Attention panel === */
+  .attention-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .attention-list {
+    display: flex;
+    flex-direction: column;
+  }
+  .attention-item {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .attention-item:hover { background: var(--surface-2); }
+  .attention-item:last-child { border-bottom: none; }
+  .severity-pill {
+    width: 8px;
+    height: 30px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .severity-pill.critical { background: var(--critical); box-shadow: 0 0 8px var(--critical-soft); }
+  .severity-pill.warn { background: var(--warn); }
+  .severity-pill.info { background: var(--info); }
+  .attention-content {
+    flex: 1;
+    min-width: 0;
+  }
+  .attention-title {
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 2px;
+    color: var(--text);
+  }
+  .attention-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.5px;
+  }
+  .attention-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    flex-shrink: 0;
+    text-align: right;
+  }
+  .attention-time .age { font-size: 9px; }
+
+  /* === Map / Topology === */
+  .map-panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 16px;
+  }
+  .map-canvas {
+    height: 320px;
+    position: relative;
+    background:
+      radial-gradient(circle at 20% 30%, var(--accent-soft) 0%, transparent 35%),
+      radial-gradient(circle at 80% 70%, var(--info-soft) 0%, transparent 35%),
+      var(--bg-2);
+    overflow: hidden;
+  }
+  .map-grid {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 40px 40px;
+    opacity: 0.5;
+  }
+  .map-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .map-node {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    cursor: pointer;
+    z-index: 2;
+  }
+  .map-node-circle {
+    width: 36px; height: 36px;
+    background: var(--surface);
+    border: 2px solid var(--healthy);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--healthy);
+    font-size: 16px;
+    transition: all 0.2s ease;
+    position: relative;
+  }
+  .map-node:hover .map-node-circle {
+    transform: scale(1.15);
+    box-shadow: 0 0 16px var(--accent-soft);
+  }
+  .map-node.warn .map-node-circle {
+    border-color: var(--warn);
+    color: var(--warn);
+    box-shadow: 0 0 12px var(--warn-soft);
+  }
+  .map-node.critical .map-node-circle {
+    border-color: var(--critical);
+    color: var(--critical);
+    box-shadow: 0 0 16px var(--critical-soft);
+    animation: nodeBlink 2s ease-in-out infinite;
+  }
+  @keyframes nodeBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.55; }
+  }
+  .map-node-label {
+    position: absolute;
+    top: 100%; left: 50%;
+    transform: translateX(-50%);
+    margin-top: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    white-space: nowrap;
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid var(--border);
+  }
+
+  /* === Topology controls === */
+  .topo-controls {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .topo-tabs {
+    display: flex;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    border-radius: 8px;
+    padding: 4px;
+    gap: 2px;
+  }
+  .topo-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    border-radius: 5px;
+    color: var(--text-dim);
+    cursor: pointer;
+    font-size: 12.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    user-select: none;
+  }
+  .topo-tab:hover {
+    color: var(--text);
+  }
+  .topo-tab.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  .topo-tab svg {
+    width: 14px;
+    height: 14px;
+  }
+  .topo-actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .topo-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.3;
+  }
+  .topo-info-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    font-weight: 600;
+  }
+  .topo-info-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 1px;
+    margin-top: 1px;
+  }
+  .topo-edit-btn.editing {
+    background: var(--accent);
+    color: var(--bg);
+    border-color: var(--accent);
+  }
+  [data-theme="light"] .topo-edit-btn.editing {
+    color: white;
+  }
+  .topo-edit-btn.editing:hover {
+    background: var(--accent);
+    opacity: 0.9;
+  }
+
+  /* === Topo view switching === */
+  .topo-view { display: none; }
+  .topo-view.active { display: block; animation: fadeIn 0.25s ease; }
+
+  /* === Edit mode visuals === */
+  body.edit-mode .map-canvas {
+    background:
+      repeating-linear-gradient(45deg, var(--accent-soft) 0px, var(--accent-soft) 1px, transparent 1px, transparent 6px),
+      var(--bg-2);
+    cursor: move;
+  }
+  body.edit-mode .map-node.draggable .map-node-circle {
+    box-shadow: 0 0 0 2px var(--accent-soft), 0 0 12px var(--accent-soft);
+  }
+  body.edit-mode .map-node.draggable:hover .map-node-circle {
+    box-shadow: 0 0 0 3px var(--accent), 0 0 16px var(--accent-glow);
+    cursor: grab;
+  }
+  body.edit-mode .map-node.draggable:active .map-node-circle {
+    cursor: grabbing;
+  }
+
+  /* Edit mode badge floating in canvas */
+  .edit-mode-badge {
+    display: none;
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    background: var(--accent);
+    color: var(--bg);
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    z-index: 10;
+    animation: pulse 2s ease-in-out infinite;
+  }
+  [data-theme="light"] .edit-mode-badge { color: white; }
+  body.edit-mode .edit-mode-badge { display: block; }
+
+
+  .bandwidth-chart svg {
+    width: 100%;
+    height: 200px;
+  }
+
+  /* === Sites grid === */
+  .sites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .site-card {
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .site-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+  }
+  .site-card .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 12px;
+  }
+  .site-card .name {
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--text);
+  }
+  .site-card .location {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+  }
+  .site-status {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--healthy);
+    flex-shrink: 0;
+    margin-top: 4px;
+  }
+  .site-status.warn { background: var(--warn); }
+  .site-status.critical { background: var(--critical); }
+  .site-card .stats {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .site-card .stats .num { color: var(--text); font-weight: 600; }
+
+  /* === Tables === */
+  .table-wrap {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th {
+    text-align: left;
+    padding: 12px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 1.5px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface-2);
+    font-weight: 500;
+  }
+  td {
+    padding: 12px 20px;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr.clickable { cursor: pointer; transition: background 0.15s ease; }
+  tr.clickable:hover { background: var(--surface-2); }
+
+  .device-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .device-status::before {
+    content: '';
+    width: 6px; height: 6px;
+    border-radius: 50%;
+  }
+  .device-status.healthy { color: var(--healthy); }
+  .device-status.healthy::before { background: var(--healthy); box-shadow: 0 0 6px var(--healthy); }
+  .device-status.warn { color: var(--warn); }
+  .device-status.warn::before { background: var(--warn); box-shadow: 0 0 6px var(--warn); }
+  .device-status.critical { color: var(--critical); }
+  .device-status.critical::before { background: var(--critical); box-shadow: 0 0 6px var(--critical); animation: blink 1s infinite; }
+  .device-status.offline { color: var(--text-faint); }
+  .device-status.offline::before { background: var(--text-faint); }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .device-type {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: 1px;
+    background: var(--surface-3);
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .device-name {
+    font-weight: 600;
+    color: var(--text);
+  }
+  .device-ip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+  .util-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .util-bar-track {
+    width: 60px;
+    height: 4px;
+    background: var(--surface-3);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .util-bar-fill {
+    height: 100%;
+    background: var(--healthy);
+    border-radius: 2px;
+  }
+  .util-bar-fill.warn { background: var(--warn); }
+  .util-bar-fill.critical { background: var(--critical); }
+  .util-bar-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    min-width: 38px;
+  }
+
+  /* === Top talkers === */
+  .talker-row {
+    display: grid;
+    grid-template-columns: 24px 1fr 80px 60px;
+    gap: 12px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: center;
+    font-size: 12px;
+  }
+  .talker-row:last-child { border-bottom: none; }
+  .talker-rank {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-faint);
+    font-size: 11px;
+  }
+  .talker-name {
+    color: var(--text);
+    font-weight: 500;
+  }
+  .talker-name .sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    display: block;
+  }
+  .talker-bar {
+    height: 4px;
+    background: var(--surface-3);
+    border-radius: 2px;
+    overflow: hidden;
+    position: relative;
+  }
+  .talker-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--healthy));
+    border-radius: 2px;
+  }
+  .talker-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text);
+    text-align: right;
+  }
+
+  /* === Alerts page === */
+  .alert-row {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 8px 1fr 200px 120px 100px;
+    gap: 16px;
+    align-items: center;
+  }
+  .alert-row:last-child { border-bottom: none; }
+  .alert-bar {
+    width: 4px;
+    height: 36px;
+    border-radius: 2px;
+  }
+  .alert-bar.critical { background: var(--critical); }
+  .alert-bar.warn { background: var(--warn); }
+  .alert-bar.info { background: var(--info); }
+  .alert-text {
+    font-size: 13px;
+    color: var(--text);
+  }
+  .alert-text .meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    margin-top: 2px;
+  }
+  .alert-action {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    letter-spacing: 0.5px;
+  }
+  .alert-action .delivered {
+    color: var(--healthy);
+  }
+  .alert-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+  }
+
+  /* === Reports === */
+  .report-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .report-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .report-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .report-card .icon-box {
+    width: 40px; height: 40px;
+    background: var(--accent-soft);
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    margin-bottom: 14px;
+    color: var(--accent);
+  }
+  .report-card .title {
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 6px;
+  }
+  .report-card .desc {
+    font-size: 12px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.5;
+  }
+  .report-card .footer {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-faint);
+    letter-spacing: 0.5px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* === Settings === */
+  .settings-section {
+    margin-bottom: 24px;
+  }
+  .settings-row {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: 24px;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border);
+    align-items: start;
+  }
+  .settings-row:last-child { border-bottom: none; }
+  .settings-label .name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .settings-label .desc {
+    font-size: 11px;
+    color: var(--text-dim);
+    line-height: 1.4;
+  }
+  .toggle {
+    display: inline-flex;
+    width: 38px; height: 20px;
+    background: var(--surface-3);
+    border-radius: 10px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .toggle::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: all 0.2s;
+  }
+  .toggle.on {
+    background: var(--accent);
+  }
+  .toggle.on::after {
+    left: 21px;
+  }
+  [data-theme="dark"] .toggle::after { background: var(--text-dim); }
+  [data-theme="dark"] .toggle.on::after { background: var(--bg); }
+  .input {
+    background: var(--surface-2);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 13px;
+    width: 100%;
+    max-width: 320px;
+  }
+  .input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  /* === Empty state for placeholder views === */
+  .empty-state {
+    text-align: center;
+    padding: 80px 40px;
+    color: var(--text-dim);
+  }
+  .empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+  .empty-state p {
+    font-size: 13px;
+    max-width: 420px;
+    margin: 0 auto 16px;
+  }
+
+  /* === Mobile / responsive === */
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; }
+    .sidebar {
+      position: fixed;
+      top: 30px;
+      left: -240px;
+      transition: left 0.25s ease;
+      z-index: 150;
+    }
+    .sidebar.open { left: 0; }
+    .main { padding: 20px 16px; grid-column: 1; }
+    .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    .topbar { flex-direction: column; align-items: flex-start; gap: 12px; }
+    .menu-toggle { display: inline-flex !important; }
+  }
+  .menu-toggle {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border-light);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+  }
+</style>
+</head>
+<body>
+
+<!-- Concept Banner -->
+<div class="concept-banner">
+  <div class="left">
+    <div class="dot"></div>
+    <span>CONCEPT PREVIEW · DEMO DATA</span>
+  </div>
+  <div class="right">
+    Argus by Meridian Cyber · v1.0
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-logo"></div>
+      <div class="brand-text">
+        <div class="name">Argus</div>
+        <div class="product">NETWORK VISION</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <div class="nav-section">MONITORING</div>
+      <div class="nav-item active" data-view="dashboard">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item" data-view="sites">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        Sites
+      </div>
+      <div class="nav-item" data-view="devices">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+        Devices
+      </div>
+      <div class="nav-item" data-view="topology">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="6" y2="17"/><line x1="12" y1="7" x2="18" y2="17"/></svg>
+        Topology
+      </div>
+
+      <div class="nav-section">OPERATIONS</div>
+      <div class="nav-item" data-view="alerts">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+        Alerts
+        <span class="badge">3</span>
+      </div>
+      <div class="nav-item" data-view="reports">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Reports
+      </div>
+
+      <div class="nav-section">SETTINGS</div>
+      <div class="nav-item" data-view="settings">
+        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Configuration
+      </div>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="client-info">
+        <div class="label">CLIENT</div>
+        <div class="name">Acme Corp UAE</div>
+      </div>
+      <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text-faint);">›</div>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <main class="main">
+
+    <!-- Topbar -->
+    <div class="topbar">
+      <div class="topbar-left">
+        <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+        <h1 id="page-title">Network Status</h1>
+        <div class="breadcrumb" id="page-breadcrumb">
+          <span>ACME CORP UAE</span>
+          <span>›</span>
+          <span class="accent">DASHBOARD</span>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <button class="btn" onclick="toggleTheme()">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+          <span id="theme-label">Light</span>
+        </button>
+        <button class="btn">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+        </button>
+        <div class="user-menu" onclick="this.classList.toggle('open')">
+          <div class="user-avatar">MC</div>
+          <div class="user-info">
+            <div class="user-name">Meridian Cyber</div>
+            <div class="user-role">MSP · ADMIN</div>
+          </div>
+          <svg class="user-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
+          <div class="user-dropdown">
+            <div class="user-dropdown-head">
+              <div class="user-avatar lg">MC</div>
+              <div>
+                <div class="user-name">Meridian Cyber</div>
+                <div class="user-email">ajay@meridiancyber.ai</div>
+              </div>
+            </div>
+            <div class="user-dropdown-list">
+              <div class="user-dropdown-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                Profile
+              </div>
+              <div class="user-dropdown-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                Manage Team
+              </div>
+              <div class="user-dropdown-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                Account Settings
+              </div>
+              <div class="user-dropdown-divider"></div>
+              <div class="user-dropdown-item">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+                Sign Out
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ DASHBOARD VIEW ============ -->
+    <div class="view active" id="view-dashboard">
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card warn">
+          <div class="label">OVERALL HEALTH</div>
+          <div class="value">94.2%</div>
+          <div class="delta"><span class="down">▼ 2.1%</span> vs 24h ago</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">DEVICES MONITORED</div>
+          <div class="value">248</div>
+          <div class="delta">8 sites · 5 device types</div>
+        </div>
+        <div class="stat-card critical">
+          <div class="label">OPEN INCIDENTS</div>
+          <div class="value">3</div>
+          <div class="delta"><span class="down">2 critical</span> · 1 warning</div>
+        </div>
+        <div class="stat-card healthy">
+          <div class="label">UPTIME (30D)</div>
+          <div class="value">99.87%</div>
+          <div class="delta"><span class="up">▲ 0.04%</span> vs target</div>
+        </div>
+      </div>
+
+      <!-- Pulse + Attention -->
+      <div class="grid-2">
+        <div class="pulse-panel" style="grid-column: span 1;">
+          <div class="pulse-head">
+            <div class="pulse-status">
+              <div class="pulse-dot"></div>
+              <div>
+                <div class="pulse-label">NETWORK PULSE · LIVE</div>
+                <div class="state">DEGRADED</div>
+              </div>
+            </div>
+            <div class="pulse-meta">
+              <div class="big">187 ms</div>
+              <div>avg latency · 30s window</div>
+            </div>
+          </div>
+          <div class="waveform">
+            <svg viewBox="0 0 800 120" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="pulseGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="var(--warn)" stop-opacity="0.4"/>
+                  <stop offset="100%" stop-color="var(--warn)" stop-opacity="0"/>
+                </linearGradient>
+                <linearGradient id="pulseStroke" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stop-color="var(--healthy)"/>
+                  <stop offset="60%" stop-color="var(--healthy)"/>
+                  <stop offset="80%" stop-color="var(--warn)"/>
+                  <stop offset="100%" stop-color="var(--warn)"/>
+                </linearGradient>
+              </defs>
+              <path id="pulseFill" d="M0,75 L50,72 L100,78 L150,68 L200,80 L250,65 L300,82 L350,60 L400,78 L450,55 L500,72 L550,42 L600,28 L650,38 L700,25 L750,32 L800,40 L800,120 L0,120 Z" fill="url(#pulseGrad)"/>
+              <path id="pulsePath" d="M0,75 L50,72 L100,78 L150,68 L200,80 L250,65 L300,82 L350,60 L400,78 L450,55 L500,72 L550,42 L600,28 L650,38 L700,25 L750,32 L800,40" stroke="url(#pulseStroke)" stroke-width="2" fill="none"/>
+            </svg>
+          </div>
+        </div>
+
+        <div class="attention-panel">
+          <div class="panel-head">
+            <h3>Attention Required</h3>
+            <span class="meta">3 ITEMS</span>
+          </div>
+          <div class="attention-list">
+            <div class="attention-item" onclick="navigateTo('alerts')">
+              <div class="severity-pill critical"></div>
+              <div class="attention-content">
+                <div class="attention-title">FW-DXB-CORE01 packet drop spike</div>
+                <div class="attention-meta">DUBAI HQ · FORTIGATE 600F</div>
+              </div>
+              <div class="attention-time">
+                <div>14:32</div>
+                <div class="age">3m ago</div>
+              </div>
+            </div>
+            <div class="attention-item" onclick="navigateTo('alerts')">
+              <div class="severity-pill critical"></div>
+              <div class="attention-content">
+                <div class="attention-title">SW-AUH-DIST02 unreachable</div>
+                <div class="attention-meta">ABU DHABI · CISCO C9300</div>
+              </div>
+              <div class="attention-time">
+                <div>14:08</div>
+                <div class="age">27m ago</div>
+              </div>
+            </div>
+            <div class="attention-item" onclick="navigateTo('alerts')">
+              <div class="severity-pill warn"></div>
+              <div class="attention-content">
+                <div class="attention-title">AP-SHJ-FLR2-08 high client load</div>
+                <div class="attention-meta">SHARJAH · ARUBA AP-635</div>
+              </div>
+              <div class="attention-time">
+                <div>13:55</div>
+                <div class="age">40m ago</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Topology map -->
+      <div class="map-panel">
+        <div class="panel-head">
+          <h3>Network Topology · Live Status</h3>
+          <span class="meta">8 SITES · CLICK TO DRILL DOWN</span>
+        </div>
+        <div class="map-canvas">
+          <div class="map-grid"></div>
+          <svg class="map-svg">
+            <line x1="50%" y1="25%" x2="25%" y2="55%" stroke="var(--border-light)" stroke-width="1"/>
+            <line x1="50%" y1="25%" x2="75%" y2="55%" stroke="var(--border-light)" stroke-width="1"/>
+            <line x1="50%" y1="25%" x2="50%" y2="55%" stroke="var(--border-light)" stroke-width="1"/>
+            <line x1="25%" y1="55%" x2="15%" y2="80%" stroke="var(--border-light)" stroke-width="1"/>
+            <line x1="25%" y1="55%" x2="35%" y2="80%" stroke="var(--border-light)" stroke-width="1"/>
+            <line x1="50%" y1="55%" x2="50%" y2="80%" stroke="var(--border-light)" stroke-width="1"/>
+            <line x1="75%" y1="55%" x2="65%" y2="80%" stroke="var(--critical)" stroke-width="1.5" stroke-dasharray="3,3"/>
+            <line x1="75%" y1="55%" x2="85%" y2="80%" stroke="var(--border-light)" stroke-width="1"/>
+          </svg>
+          <div class="map-node" style="top:25%;left:50%;" onclick="navigateTo('sites')">
+            <div class="map-node-circle">▣</div>
+            <div class="map-node-label">DUBAI HQ</div>
+          </div>
+          <div class="map-node" style="top:55%;left:25%;">
+            <div class="map-node-circle">◆</div>
+            <div class="map-node-label">DUBAI MARINA</div>
+          </div>
+          <div class="map-node" style="top:55%;left:50%;">
+            <div class="map-node-circle">◆</div>
+            <div class="map-node-label">JEBEL ALI</div>
+          </div>
+          <div class="map-node critical" style="top:55%;left:75%;">
+            <div class="map-node-circle">◆</div>
+            <div class="map-node-label">ABU DHABI</div>
+          </div>
+          <div class="map-node" style="top:80%;left:15%;">
+            <div class="map-node-circle">●</div>
+            <div class="map-node-label">JLT</div>
+          </div>
+          <div class="map-node warn" style="top:80%;left:35%;">
+            <div class="map-node-circle">●</div>
+            <div class="map-node-label">SHARJAH</div>
+          </div>
+          <div class="map-node" style="top:80%;left:50%;">
+            <div class="map-node-circle">●</div>
+            <div class="map-node-label">DXB AIRPORT</div>
+          </div>
+          <div class="map-node" style="top:80%;left:65%;">
+            <div class="map-node-circle">●</div>
+            <div class="map-node-label">AL AIN</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bandwidth + Top Talkers -->
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-head">
+            <h3>WAN Bandwidth · Last 24 Hours</h3>
+            <span class="meta">PEAK: 847 Mbps</span>
+          </div>
+          <div class="panel-body">
+            <div class="bandwidth-chart">
+              <svg viewBox="0 0 800 200" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="bwGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.3"/>
+                    <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <g stroke="var(--border)" stroke-width="0.5">
+                  <line x1="0" y1="50" x2="800" y2="50"/>
+                  <line x1="0" y1="100" x2="800" y2="100"/>
+                  <line x1="0" y1="150" x2="800" y2="150"/>
+                </g>
+                <path d="M0,180 L40,170 L80,165 L120,150 L160,140 L200,135 L240,120 L280,100 L320,90 L360,85 L400,80 L440,75 L480,70 L520,60 L560,45 L600,30 L640,40 L680,55 L720,75 L760,100 L800,130 L800,200 L0,200 Z" fill="url(#bwGrad)"/>
+                <path d="M0,180 L40,170 L80,165 L120,150 L160,140 L200,135 L240,120 L280,100 L320,90 L360,85 L400,80 L440,75 L480,70 L520,60 L560,45 L600,30 L640,40 L680,55 L720,75 L760,100 L800,130" stroke="var(--accent)" stroke-width="2" fill="none"/>
+                <g font-family="JetBrains Mono" font-size="9" fill="var(--text-faint)">
+                  <text x="0" y="195">00:00</text>
+                  <text x="195" y="195">06:00</text>
+                  <text x="395" y="195">12:00</text>
+                  <text x="595" y="195">18:00</text>
+                  <text x="775" y="195">NOW</text>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-head">
+            <h3>Top Talkers</h3>
+            <span class="meta">LAST 1H</span>
+          </div>
+          <div>
+            <div class="talker-row">
+              <div class="talker-rank">01</div>
+              <div class="talker-name">file-srv-01<span class="sub">10.20.4.12</span></div>
+              <div class="talker-bar"><div class="talker-bar-fill" style="width:88%;"></div></div>
+              <div class="talker-value">1.2 GB</div>
+            </div>
+            <div class="talker-row">
+              <div class="talker-rank">02</div>
+              <div class="talker-name">vmware-host-3<span class="sub">10.20.4.5</span></div>
+              <div class="talker-bar"><div class="talker-bar-fill" style="width:62%;"></div></div>
+              <div class="talker-value">820 MB</div>
+            </div>
+            <div class="talker-row">
+              <div class="talker-rank">03</div>
+              <div class="talker-name">backup-01<span class="sub">10.20.8.21</span></div>
+              <div class="talker-bar"><div class="talker-bar-fill" style="width:48%;"></div></div>
+              <div class="talker-value">615 MB</div>
+            </div>
+            <div class="talker-row">
+              <div class="talker-rank">04</div>
+              <div class="talker-name">erp-app-01<span class="sub">10.20.6.34</span></div>
+              <div class="talker-bar"><div class="talker-bar-fill" style="width:35%;"></div></div>
+              <div class="talker-value">450 MB</div>
+            </div>
+            <div class="talker-row">
+              <div class="talker-rank">05</div>
+              <div class="talker-name">guest-wifi-vlan<span class="sub">10.30.0.0/16</span></div>
+              <div class="talker-bar"><div class="talker-bar-fill" style="width:22%;"></div></div>
+              <div class="talker-value">280 MB</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Devices -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Recent Device Activity</h3>
+          <span class="meta">CLICK ROW FOR DETAIL · <a href="#" onclick="navigateTo('devices');return false;" style="color:var(--accent);text-decoration:none;">VIEW ALL ›</a></span>
+        </div>
+        <div class="panel-body no-pad">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Device</th><th>Type</th><th>Site</th><th>Status</th><th>CPU</th><th>Memory</th><th>Uptime</th>
+                </tr>
+              </thead>
+              <tbody id="dashDevicesBody">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SITES VIEW ============ -->
+    <div class="view" id="view-sites">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Client Sites</h3>
+          <span class="meta">8 LOCATIONS · UAE</span>
+        </div>
+        <div class="panel-body">
+          <div class="sites-grid" id="sitesGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ DEVICES VIEW ============ -->
+    <div class="view" id="view-devices">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>All Devices</h3>
+          <span class="meta">248 TOTAL · 245 ONLINE · 3 ALERTING</span>
+        </div>
+        <div class="panel-body no-pad">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Name</th><th>Type</th><th>Vendor</th><th>Site</th><th>IP Address</th><th>Status</th><th>CPU</th><th>Memory</th>
+                </tr>
+              </thead>
+              <tbody id="devicesBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ TOPOLOGY VIEW ============ -->
+    <div class="view" id="view-topology">
+      <!-- Topology mode selector & controls -->
+      <div class="topo-controls">
+        <div class="topo-tabs">
+          <div class="topo-tab active" data-topo="network" onclick="switchTopoView('network')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="5" r="2"/><circle cx="5" cy="19" r="2"/><circle cx="19" cy="19" r="2"/><line x1="12" y1="7" x2="6" y2="17"/><line x1="12" y1="7" x2="18" y2="17"/></svg>
+            Network · L2/L3
+          </div>
+          <div class="topo-tab" data-topo="wireless" onclick="switchTopoView('wireless')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+            Wireless
+          </div>
+          <div class="topo-tab" data-topo="logical" onclick="switchTopoView('logical')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            Logical · Services
+          </div>
+        </div>
+        <div class="topo-actions">
+          <div class="topo-info">
+            <span class="topo-info-label">AUTO-DISCOVERED</span>
+            <span class="topo-info-meta">VIA LLDP · CDP · SNMP · 04:12 GMT</span>
+          </div>
+          <button class="btn topo-edit-btn" onclick="toggleEditMode()">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            <span id="editModeLabel">Edit Topology</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===== NETWORK TOPOLOGY ===== -->
+      <div class="topo-view active" id="topo-network">
+        <div class="map-panel" style="margin-bottom: 16px;">
+          <div class="panel-head">
+            <h3>L2/L3 Network · Hierarchical</h3>
+            <span class="meta">CORE → DISTRIBUTION → ACCESS · 4 LINKS · 1 ALERTING</span>
+          </div>
+          <div class="map-canvas" id="topoCanvasNetwork" style="height: 480px;">
+            <div class="map-grid"></div>
+            <svg class="map-svg">
+              <line x1="50%" y1="12%" x2="20%" y2="35%" stroke="var(--border-light)" stroke-width="1.5"/>
+              <line x1="50%" y1="12%" x2="50%" y2="35%" stroke="var(--border-light)" stroke-width="1.5"/>
+              <line x1="50%" y1="12%" x2="80%" y2="35%" stroke="var(--critical)" stroke-width="2" stroke-dasharray="4,3"/>
+              <line x1="20%" y1="35%" x2="10%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="20%" y1="35%" x2="20%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="20%" y1="35%" x2="30%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="50%" y1="35%" x2="42%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="50%" y1="35%" x2="50%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="50%" y1="35%" x2="58%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="80%" y1="35%" x2="70%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="80%" y1="35%" x2="80%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="80%" y1="35%" x2="90%" y2="60%" stroke="var(--border-light)" stroke-width="1"/>
+              <line x1="10%" y1="60%" x2="6%" y2="85%" stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="10%" y1="60%" x2="14%" y2="85%" stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="50%" y1="60%" x2="45%" y2="85%" stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="50%" y1="60%" x2="55%" y2="85%" stroke="var(--border)" stroke-width="0.5"/>
+            </svg>
+            <div class="map-node draggable" style="top:12%;left:50%;">
+              <div class="map-node-circle">⚡</div>
+              <div class="map-node-label">CORE-RTR-01</div>
+            </div>
+            <div class="map-node draggable" style="top:35%;left:20%;">
+              <div class="map-node-circle">▣</div>
+              <div class="map-node-label">DIST-DXB-01</div>
+            </div>
+            <div class="map-node draggable" style="top:35%;left:50%;">
+              <div class="map-node-circle">▣</div>
+              <div class="map-node-label">DIST-DXB-02</div>
+            </div>
+            <div class="map-node critical draggable" style="top:35%;left:80%;">
+              <div class="map-node-circle">▣</div>
+              <div class="map-node-label">DIST-AUH-02</div>
+            </div>
+            <div class="map-node draggable" style="top:60%;left:10%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-1</div></div>
+            <div class="map-node draggable" style="top:60%;left:20%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-2</div></div>
+            <div class="map-node draggable" style="top:60%;left:30%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-3</div></div>
+            <div class="map-node draggable" style="top:60%;left:42%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-4</div></div>
+            <div class="map-node warn draggable" style="top:60%;left:50%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-5</div></div>
+            <div class="map-node draggable" style="top:60%;left:58%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-6</div></div>
+            <div class="map-node draggable" style="top:60%;left:70%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-7</div></div>
+            <div class="map-node draggable" style="top:60%;left:80%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-8</div></div>
+            <div class="map-node draggable" style="top:60%;left:90%;"><div class="map-node-circle" style="font-size:13px;">◆</div><div class="map-node-label">ACC-9</div></div>
+            <div class="map-node draggable" style="top:85%;left:6%;"><div class="map-node-circle" style="width:24px;height:24px;font-size:10px;">📡</div><div class="map-node-label">AP×8</div></div>
+            <div class="map-node draggable" style="top:85%;left:14%;"><div class="map-node-circle" style="width:24px;height:24px;font-size:10px;">▢</div><div class="map-node-label">SRV×4</div></div>
+            <div class="map-node draggable" style="top:85%;left:45%;"><div class="map-node-circle" style="width:24px;height:24px;font-size:10px;">📡</div><div class="map-node-label">AP×12</div></div>
+            <div class="map-node draggable" style="top:85%;left:55%;"><div class="map-node-circle" style="width:24px;height:24px;font-size:10px;">▢</div><div class="map-node-label">SRV×6</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== WIRELESS TOPOLOGY ===== -->
+      <div class="topo-view" id="topo-wireless">
+        <div class="map-panel" style="margin-bottom: 16px;">
+          <div class="panel-head">
+            <h3>Wireless · Controllers &amp; APs</h3>
+            <span class="meta">2 CONTROLLERS · 28 APs · 184 ACTIVE CLIENTS</span>
+          </div>
+          <div class="map-canvas" style="height: 480px;">
+            <div class="map-grid"></div>
+            <svg class="map-svg">
+              <!-- Controller to APs (Dubai) -->
+              <line x1="25%" y1="20%" x2="10%" y2="50%" stroke="var(--accent)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <line x1="25%" y1="20%" x2="18%" y2="50%" stroke="var(--accent)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <line x1="25%" y1="20%" x2="26%" y2="50%" stroke="var(--accent)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <line x1="25%" y1="20%" x2="34%" y2="50%" stroke="var(--accent)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <line x1="25%" y1="20%" x2="42%" y2="50%" stroke="var(--accent)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <!-- Floor 14 group -->
+              <line x1="10%" y1="50%" x2="6%" y2="78%" stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="10%" y1="50%" x2="14%" y2="78%" stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="18%" y1="50%" x2="18%" y2="78%" stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="26%" y1="50%" x2="26%" y2="78%" stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="34%" y1="50%" x2="34%" y2="78%" stroke="var(--border)" stroke-width="0.5"/>
+              <line x1="42%" y1="50%" x2="42%" y2="78%" stroke="var(--border)" stroke-width="0.5"/>
+              <!-- Controller to APs (Abu Dhabi) -->
+              <line x1="75%" y1="20%" x2="60%" y2="50%" stroke="var(--info)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <line x1="75%" y1="20%" x2="68%" y2="50%" stroke="var(--info)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <line x1="75%" y1="20%" x2="76%" y2="50%" stroke="var(--info)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <line x1="75%" y1="20%" x2="84%" y2="50%" stroke="var(--info)" stroke-width="1.5" stroke-opacity="0.6"/>
+              <line x1="75%" y1="20%" x2="92%" y2="50%" stroke="var(--info)" stroke-width="1.5" stroke-opacity="0.6"/>
+            </svg>
+            <!-- Group labels -->
+            <div style="position:absolute;top:5%;left:8%;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--accent);letter-spacing:2px;font-weight:600;">DUBAI HQ · WLC-DXB-01 · ARUBA 7240XM</div>
+            <div style="position:absolute;top:5%;left:60%;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--info);letter-spacing:2px;font-weight:600;">ABU DHABI · WLC-AUH-01 · CISCO C9800</div>
+            <!-- Controllers -->
+            <div class="map-node draggable" style="top:20%;left:25%;">
+              <div class="map-node-circle" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent);">⊞</div>
+              <div class="map-node-label">WLC-DXB-01</div>
+            </div>
+            <div class="map-node draggable" style="top:20%;left:75%;">
+              <div class="map-node-circle" style="background:var(--info-soft);border-color:var(--info);color:var(--info);">⊞</div>
+              <div class="map-node-label">WLC-AUH-01</div>
+            </div>
+            <!-- Dubai APs row 1 -->
+            <div class="map-node draggable" style="top:50%;left:10%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-FLR14-01</div></div>
+            <div class="map-node draggable" style="top:50%;left:18%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-FLR14-02</div></div>
+            <div class="map-node draggable" style="top:50%;left:26%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-FLR14-03</div></div>
+            <div class="map-node draggable" style="top:50%;left:34%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-FLR15-01</div></div>
+            <div class="map-node draggable" style="top:50%;left:42%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-FLR15-02</div></div>
+            <!-- Abu Dhabi APs row 1 -->
+            <div class="map-node draggable" style="top:50%;left:60%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-AUH-01</div></div>
+            <div class="map-node draggable" style="top:50%;left:68%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-AUH-02</div></div>
+            <div class="map-node draggable" style="top:50%;left:76%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-AUH-03</div></div>
+            <div class="map-node draggable" style="top:50%;left:84%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-AUH-04</div></div>
+            <div class="map-node draggable" style="top:50%;left:92%;"><div class="map-node-circle" style="width:28px;height:28px;font-size:12px;">📡</div><div class="map-node-label">AP-AUH-05</div></div>
+            <!-- Sharjah AP (warning) -->
+            <div class="map-node warn draggable" style="top:78%;left:18%;"><div class="map-node-circle" style="width:24px;height:24px;font-size:10px;">📡</div><div class="map-node-label">AP-SHJ-FLR2-08</div></div>
+            <!-- Client count chips -->
+            <div style="position:absolute;top:78%;left:6%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-faint);background:var(--surface-2);padding:1px 5px;border-radius:3px;">14 clients</div>
+            <div style="position:absolute;top:78%;left:14%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-faint);background:var(--surface-2);padding:1px 5px;border-radius:3px;">22 clients</div>
+            <div style="position:absolute;top:78%;left:26%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-faint);background:var(--surface-2);padding:1px 5px;border-radius:3px;">8 clients</div>
+            <div style="position:absolute;top:78%;left:34%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text-faint);background:var(--surface-2);padding:1px 5px;border-radius:3px;">11 clients</div>
+            <div style="position:absolute;top:78%;left:42%;transform:translate(-50%,-50%);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--warn);background:var(--surface-2);padding:1px 5px;border-radius:3px;font-weight:600;">78 clients</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ===== LOGICAL/SERVICE TOPOLOGY ===== -->
+      <div class="topo-view" id="topo-logical">
+        <div class="map-panel" style="margin-bottom: 16px;">
+          <div class="panel-head">
+            <h3>Logical Services · Application Dependencies</h3>
+            <span class="meta">5 SERVICE GROUPS · MANUALLY DEFINED</span>
+          </div>
+          <div class="map-canvas" style="height: 480px;">
+            <div class="map-grid"></div>
+            <svg class="map-svg">
+              <!-- ERP service chain -->
+              <line x1="20%" y1="25%" x2="20%" y2="50%" stroke="var(--healthy)" stroke-width="1.5"/>
+              <line x1="20%" y1="50%" x2="20%" y2="75%" stroke="var(--healthy)" stroke-width="1.5"/>
+              <!-- File service -->
+              <line x1="50%" y1="25%" x2="50%" y2="50%" stroke="var(--healthy)" stroke-width="1.5"/>
+              <line x1="50%" y1="50%" x2="50%" y2="75%" stroke="var(--healthy)" stroke-width="1.5"/>
+              <!-- AD/Auth -->
+              <line x1="80%" y1="25%" x2="80%" y2="50%" stroke="var(--healthy)" stroke-width="1.5"/>
+              <line x1="80%" y1="50%" x2="80%" y2="75%" stroke="var(--healthy)" stroke-width="1.5"/>
+            </svg>
+            <!-- ERP -->
+            <div style="position:absolute;top:14%;left:20%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:600;">ERP SERVICE</div>
+            <div class="map-node draggable" style="top:25%;left:20%;"><div class="map-node-circle" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent);">⌘</div><div class="map-node-label">erp.acmecorp.ae</div></div>
+            <div class="map-node draggable" style="top:50%;left:20%;"><div class="map-node-circle" style="width:30px;height:30px;font-size:13px;">▢</div><div class="map-node-label">SRV-ERP-APP01</div></div>
+            <div class="map-node draggable" style="top:75%;left:20%;"><div class="map-node-circle" style="width:30px;height:30px;font-size:13px;">▢</div><div class="map-node-label">SRV-ERP-DB01</div></div>
+            <!-- File -->
+            <div style="position:absolute;top:14%;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:600;">FILE SERVICES</div>
+            <div class="map-node draggable" style="top:25%;left:50%;"><div class="map-node-circle" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent);">⌘</div><div class="map-node-label">files.acmecorp.ae</div></div>
+            <div class="map-node draggable" style="top:50%;left:50%;"><div class="map-node-circle" style="width:30px;height:30px;font-size:13px;">▢</div><div class="map-node-label">SRV-FILE-01</div></div>
+            <div class="map-node draggable" style="top:75%;left:50%;"><div class="map-node-circle" style="width:30px;height:30px;font-size:13px;">▢</div><div class="map-node-label">SRV-BACKUP-01</div></div>
+            <!-- AD/Auth -->
+            <div style="position:absolute;top:14%;left:80%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--accent);letter-spacing:2px;font-weight:600;">DIRECTORY SERVICES</div>
+            <div class="map-node draggable" style="top:25%;left:80%;"><div class="map-node-circle" style="background:var(--accent-soft);border-color:var(--accent);color:var(--accent);">⌘</div><div class="map-node-label">acmecorp.local</div></div>
+            <div class="map-node draggable" style="top:50%;left:80%;"><div class="map-node-circle" style="width:30px;height:30px;font-size:13px;">▢</div><div class="map-node-label">SRV-DC-01</div></div>
+            <div class="map-node draggable" style="top:75%;left:80%;"><div class="map-node-circle" style="width:30px;height:30px;font-size:13px;">▢</div><div class="map-node-label">SRV-DC-02</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Legend (shared across views) -->
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Legend &amp; Capabilities</h3>
+          <span class="meta">CLICK ANY NODE TO DRILL DOWN</span>
+        </div>
+        <div class="panel-body">
+          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; font-size: 12px; margin-bottom: 16px;">
+            <div><span style="color:var(--accent);font-size:18px;margin-right:8px;">⚡</span>Core Router / Firewall</div>
+            <div><span style="color:var(--healthy);font-size:18px;margin-right:8px;">▣</span>Distribution Switch</div>
+            <div><span style="color:var(--healthy);font-size:18px;margin-right:8px;">◆</span>Access Switch</div>
+            <div><span style="color:var(--healthy);font-size:14px;margin-right:8px;">📡</span>Wireless AP</div>
+            <div><span style="color:var(--accent);font-size:18px;margin-right:8px;">⊞</span>WiFi Controller</div>
+            <div><span style="color:var(--text);font-size:18px;margin-right:8px;">▢</span>Server / VM</div>
+            <div><span style="color:var(--accent);font-size:18px;margin-right:8px;">⌘</span>Service Endpoint</div>
+            <div><span style="color:var(--critical);font-size:14px;margin-right:8px;">━━━</span>Issue / Packet Loss</div>
+          </div>
+          <div style="padding-top: 16px; border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 2px; margin-bottom: 6px; font-weight: 600;">AUTO-DISCOVERY</div>
+              <div style="font-size: 12px; color: var(--text-dim); line-height: 1.6;">Devices and links auto-discovered via LLDP, CDP, and SNMP table walks. Refreshes every 4 hours. Manual edits are preserved across discovery cycles.</div>
+            </div>
+            <div>
+              <div style="font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); letter-spacing: 2px; margin-bottom: 6px; font-weight: 600;">MANUAL OVERRIDE</div>
+              <div style="font-size: 12px; color: var(--text-dim); line-height: 1.6;">Click "Edit Topology" to drag nodes, redraw connections, group stacked switches, and correct mis-detected links. Auto-discovery respects your edits.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ ALERTS VIEW ============ -->
+    <div class="view" id="view-alerts">
+      <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+        <div class="stat-card critical">
+          <div class="label">CRITICAL · ACTIVE</div>
+          <div class="value">2</div>
+          <div class="delta">requires intervention</div>
+        </div>
+        <div class="stat-card warn">
+          <div class="label">WARNING · ACTIVE</div>
+          <div class="value">1</div>
+          <div class="delta">monitor closely</div>
+        </div>
+        <div class="stat-card healthy">
+          <div class="label">RESOLVED (24H)</div>
+          <div class="value">7</div>
+          <div class="delta">avg MTTR: 18 min</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Active &amp; Recent Alerts</h3>
+          <span class="meta">LAST 24 HOURS · 10 ENTRIES</span>
+        </div>
+        <div class="panel-body no-pad" id="alertsBody"></div>
+      </div>
+    </div>
+
+    <!-- ============ REPORTS VIEW ============ -->
+    <div class="view" id="view-reports">
+      <div class="panel" style="margin-bottom: 16px;">
+        <div class="panel-head">
+          <h3>Available Reports</h3>
+          <span class="meta">SCHEDULED &amp; ON-DEMAND</span>
+        </div>
+        <div class="panel-body">
+          <div class="report-grid" id="reportsGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ SETTINGS VIEW ============ -->
+    <div class="view" id="view-settings">
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Branding &amp; White-Label</h3>
+          <span class="meta">CLIENT-FACING IDENTITY</span>
+        </div>
+        <div class="panel-body no-pad">
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">Display Name</div>
+              <div class="desc">Shown in dashboard header and alerts</div>
+            </div>
+            <input class="input" value="Acme Corp UAE" type="text">
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">Custom Domain</div>
+              <div class="desc">argus.yourdomain.com</div>
+            </div>
+            <input class="input" value="monitor.acmecorp.ae" type="text">
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">Accent Color</div>
+              <div class="desc">Brand color for buttons and highlights</div>
+            </div>
+            <div style="display:flex;gap:8px;">
+              <div style="width:32px;height:32px;background:#d4ff3f;border-radius:6px;border:2px solid var(--accent);cursor:pointer;"></div>
+              <div style="width:32px;height:32px;background:#3b82f6;border-radius:6px;border:2px solid transparent;cursor:pointer;"></div>
+              <div style="width:32px;height:32px;background:#f59e0b;border-radius:6px;border:2px solid transparent;cursor:pointer;"></div>
+              <div style="width:32px;height:32px;background:#10b981;border-radius:6px;border:2px solid transparent;cursor:pointer;"></div>
+              <div style="width:32px;height:32px;background:#8b5cf6;border-radius:6px;border:2px solid transparent;cursor:pointer;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>Alert Channels</h3>
+          <span class="meta">WHO GETS NOTIFIED · HOW</span>
+        </div>
+        <div class="panel-body no-pad">
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">WhatsApp Notifications</div>
+              <div class="desc">Critical and warning alerts to phone</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:16px;">
+              <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+              <input class="input" value="+971 50 XXX XXXX" type="text" style="max-width:200px;">
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">SMS Backup</div>
+              <div class="desc">Fallback if WhatsApp delivery fails</div>
+            </div>
+            <div class="toggle on" onclick="this.classList.toggle('on')"></div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">Email Recipients</div>
+              <div class="desc">Comma-separated list, daily digest included</div>
+            </div>
+            <input class="input" value="it-team@acmecorp.ae, ciso@acmecorp.ae" type="text">
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">Quiet Hours</div>
+              <div class="desc">Only critical alerts break through</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px;">
+              <input class="input" value="22:00" type="text" style="max-width:80px;">
+              <span style="color:var(--text-dim);">to</span>
+              <input class="input" value="06:00" type="text" style="max-width:80px;">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head">
+          <h3>License Information</h3>
+          <span class="meta">ARGUS GROWTH TIER</span>
+        </div>
+        <div class="panel-body no-pad">
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">Tier</div>
+              <div class="desc">Up to 250 devices · 4 sites</div>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; color: var(--accent); font-weight: 600;">GROWTH</div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">Devices Used</div>
+              <div class="desc">Of 250 licensed</div>
+            </div>
+            <div class="util-bar">
+              <div class="util-bar-track" style="width:200px;"><div class="util-bar-fill" style="width:99%;"></div></div>
+              <div class="util-bar-text">248 / 250</div>
+            </div>
+          </div>
+          <div class="settings-row">
+            <div class="settings-label">
+              <div class="name">License Expires</div>
+              <div class="desc">Daily check to license server</div>
+            </div>
+            <div style="font-family: 'JetBrains Mono', monospace; color: var(--text);">2027-04-26 · 365 days</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+  // === Theme toggle ===
+  function toggleTheme() {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    html.setAttribute('data-theme', next);
+    document.getElementById('theme-label').textContent = next === 'dark' ? 'Light' : 'Dark';
+  }
+
+  // === Topology view switching ===
+  function switchTopoView(view) {
+    document.querySelectorAll('.topo-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.topo-tab').forEach(t => t.classList.remove('active'));
+    const target = document.getElementById('topo-' + view);
+    if (target) target.classList.add('active');
+    const tab = document.querySelector(`.topo-tab[data-topo="${view}"]`);
+    if (tab) tab.classList.add('active');
+  }
+
+  // === Edit mode toggle ===
+  let editMode = false;
+  function toggleEditMode() {
+    editMode = !editMode;
+    document.body.classList.toggle('edit-mode', editMode);
+    const label = document.getElementById('editModeLabel');
+    const btn = document.querySelector('.topo-edit-btn');
+    if (editMode) {
+      label.textContent = 'Save Changes';
+      btn.classList.add('editing');
+      // Add edit mode badges to active topo views
+      document.querySelectorAll('.topo-view.active .map-canvas').forEach(c => {
+        if (!c.querySelector('.edit-mode-badge')) {
+          const badge = document.createElement('div');
+          badge.className = 'edit-mode-badge';
+          badge.textContent = '✎ EDIT MODE · DRAG TO REPOSITION';
+          c.appendChild(badge);
+        }
+      });
+      // Wire up basic drag (within canvas bounds)
+      enableNodeDrag();
+    } else {
+      label.textContent = 'Edit Topology';
+      btn.classList.remove('editing');
+    }
+  }
+
+  function enableNodeDrag() {
+    document.querySelectorAll('.topo-view.active .map-node.draggable').forEach(node => {
+      if (node.dataset.dragWired) return;
+      node.dataset.dragWired = '1';
+      let isDragging = false, startX = 0, startY = 0, startLeft = 0, startTop = 0;
+      node.addEventListener('mousedown', (e) => {
+        if (!editMode) return;
+        isDragging = true;
+        startX = e.clientX; startY = e.clientY;
+        const cs = window.getComputedStyle(node);
+        startLeft = parseFloat(cs.left);
+        startTop = parseFloat(cs.top);
+        e.preventDefault();
+      });
+      document.addEventListener('mousemove', (e) => {
+        if (!isDragging || !editMode) return;
+        const canvas = node.closest('.map-canvas');
+        const rect = canvas.getBoundingClientRect();
+        const newLeft = startLeft + (e.clientX - startX);
+        const newTop = startTop + (e.clientY - startY);
+        node.style.left = (newLeft / rect.width * 100) + '%';
+        node.style.top = (newTop / rect.height * 100) + '%';
+      });
+      document.addEventListener('mouseup', () => { isDragging = false; });
+    });
+  }
+
+
+  const sites = [
+    { name: 'Dubai HQ', loc: 'BURJ KHALIFA · 1402', status: 'healthy', devices: 84, alerts: 0 },
+    { name: 'Dubai Marina', loc: 'CAYAN TOWER · 18F', status: 'healthy', devices: 32, alerts: 0 },
+    { name: 'Jebel Ali', loc: 'WAREHOUSE 4', status: 'healthy', devices: 28, alerts: 0 },
+    { name: 'Abu Dhabi', loc: 'CORNICHE TOWER', status: 'critical', devices: 41, alerts: 2 },
+    { name: 'JLT', loc: 'CLUSTER S', status: 'healthy', devices: 18, alerts: 0 },
+    { name: 'Sharjah', loc: 'ALWAHDA STREET', status: 'warn', devices: 22, alerts: 1 },
+    { name: 'DXB Airport', loc: 'TERMINAL 3 · OFFICE 12', status: 'healthy', devices: 14, alerts: 0 },
+    { name: 'Al Ain', loc: 'INDUSTRIAL CITY', status: 'healthy', devices: 9, alerts: 0 }
+  ];
+
+  const devices = [
+    // Switches
+    { name: 'SW-DXB-CORE01', type: 'SWITCH', vendor: 'Cisco C9500', site: 'Dubai HQ', ip: '10.10.0.2', status: 'healthy', cpu: 22, mem: 45, uptime: '187d' },
+    { name: 'SW-DXB-CORE02', type: 'SWITCH', vendor: 'Cisco C9500', site: 'Dubai HQ', ip: '10.10.0.3', status: 'healthy', cpu: 18, mem: 42, uptime: '187d' },
+    { name: 'SW-DXB-DIST01', type: 'SWITCH', vendor: 'Cisco C9300', site: 'Dubai HQ', ip: '10.10.1.2', status: 'healthy', cpu: 31, mem: 52, uptime: '94d' },
+    { name: 'SW-AUH-DIST02', type: 'SWITCH', vendor: 'Cisco C9300', site: 'Abu Dhabi', ip: '10.30.1.3', status: 'critical', cpu: 0, mem: 0, uptime: '—' },
+    { name: 'SW-MAR-ACC01', type: 'SWITCH', vendor: 'HPE Aruba 6300', site: 'Dubai Marina', ip: '10.20.1.2', status: 'healthy', cpu: 14, mem: 38, uptime: '62d' },
+    // Firewalls
+    { name: 'FW-DXB-CORE01', type: 'FIREWALL', vendor: 'Fortigate 600F', site: 'Dubai HQ', ip: '10.10.0.1', status: 'critical', cpu: 78, mem: 81, uptime: '124d' },
+    { name: 'FW-AUH-EDGE01', type: 'FIREWALL', vendor: 'Palo Alto PA-3260', site: 'Abu Dhabi', ip: '10.30.0.1', status: 'healthy', cpu: 34, mem: 58, uptime: '201d' },
+    // Routers
+    { name: 'RTR-DXB-WAN01', type: 'ROUTER', vendor: 'Cisco ISR 4451', site: 'Dubai HQ', ip: '203.0.113.1', status: 'healthy', cpu: 42, mem: 61, uptime: '312d' },
+    { name: 'RTR-AUH-WAN01', type: 'ROUTER', vendor: 'Cisco ISR 4351', site: 'Abu Dhabi', ip: '203.0.113.5', status: 'healthy', cpu: 38, mem: 55, uptime: '312d' },
+    // AP Controllers
+    { name: 'WLC-DXB-01', type: 'AP CTRLR', vendor: 'Aruba 7240XM', site: 'Dubai HQ', ip: '10.10.5.10', status: 'healthy', cpu: 28, mem: 47, uptime: '156d' },
+    { name: 'WLC-AUH-01', type: 'AP CTRLR', vendor: 'Cisco Catalyst 9800', site: 'Abu Dhabi', ip: '10.30.5.10', status: 'healthy', cpu: 32, mem: 51, uptime: '156d' },
+    // Access Points
+    { name: 'AP-DXB-FLR14-01', type: 'WIFI AP', vendor: 'Aruba AP-635', site: 'Dubai HQ', ip: '10.10.6.21', status: 'healthy', cpu: 12, mem: 35, uptime: '94d' },
+    { name: 'AP-DXB-FLR14-02', type: 'WIFI AP', vendor: 'Aruba AP-635', site: 'Dubai HQ', ip: '10.10.6.22', status: 'healthy', cpu: 14, mem: 36, uptime: '94d' },
+    { name: 'AP-SHJ-FLR2-08', type: 'WIFI AP', vendor: 'Aruba AP-635', site: 'Sharjah', ip: '10.40.6.8', status: 'warn', cpu: 67, mem: 78, uptime: '14d' },
+    // Servers
+    { name: 'SRV-FILE-01', type: 'SERVER', vendor: 'Dell R750 · Win 2022', site: 'Dubai HQ', ip: '10.10.4.10', status: 'healthy', cpu: 41, mem: 68, uptime: '47d' },
+    { name: 'SRV-DC-01', type: 'SERVER', vendor: 'Dell R740 · Win 2019', site: 'Dubai HQ', ip: '10.10.4.5', status: 'healthy', cpu: 18, mem: 52, uptime: '187d' },
+    { name: 'SRV-DC-02', type: 'SERVER', vendor: 'Dell R740 · Win 2019', site: 'Abu Dhabi', ip: '10.30.4.5', status: 'healthy', cpu: 16, mem: 49, uptime: '187d' },
+    { name: 'SRV-ESXI-03', type: 'HYPERVISOR', vendor: 'VMware ESXi 8.0', site: 'Dubai HQ', ip: '10.10.4.30', status: 'healthy', cpu: 56, mem: 71, uptime: '94d' },
+    { name: 'SRV-ERP-APP01', type: 'SERVER', vendor: 'Linux RHEL 9', site: 'Dubai HQ', ip: '10.10.6.34', status: 'healthy', cpu: 48, mem: 64, uptime: '47d' },
+    { name: 'SRV-BACKUP-01', type: 'SERVER', vendor: 'Veeam · Linux', site: 'Jebel Ali', ip: '10.50.4.10', status: 'healthy', cpu: 8, mem: 28, uptime: '47d' },
+    // UPS
+    { name: 'UPS-DXB-RACK01', type: 'UPS', vendor: 'APC Smart-UPS 3000VA', site: 'Dubai HQ', ip: '10.10.9.5', status: 'healthy', cpu: null, mem: null, uptime: '412d' }
+  ];
+
+  const alerts = [
+    { sev: 'critical', title: 'FW-DXB-CORE01 packet drop spike (>5% threshold)', meta: 'DUBAI HQ · FORTIGATE 600F · 14:32:18', delivered: ['WhatsApp', 'Email'], time: '3m ago', status: 'OPEN' },
+    { sev: 'critical', title: 'SW-AUH-DIST02 unreachable · ICMP timeout', meta: 'ABU DHABI · CISCO C9300 · 14:08:45', delivered: ['WhatsApp', 'SMS', 'Email'], time: '27m ago', status: 'OPEN' },
+    { sev: 'warn', title: 'AP-SHJ-FLR2-08 high client load (78 clients · threshold 60)', meta: 'SHARJAH · ARUBA AP-635 · 13:55:12', delivered: ['Email'], time: '40m ago', status: 'OPEN' },
+    { sev: 'info', title: 'SRV-FILE-01 disk capacity 78% (threshold 75%)', meta: 'DUBAI HQ · DELL R750 · 13:22:08', delivered: ['Email'], time: '1h ago', status: 'RESOLVED' },
+    { sev: 'warn', title: 'WAN link DXB → AUH latency spike (>120ms)', meta: 'CORE LINK · 12:48:30', delivered: ['Email'], time: '2h ago', status: 'RESOLVED' },
+    { sev: 'critical', title: 'SRV-DC-01 service Active Directory unresponsive', meta: 'DUBAI HQ · WIN 2019 · 11:15:42', delivered: ['WhatsApp', 'SMS', 'Email'], time: '3h ago', status: 'RESOLVED' },
+    { sev: 'info', title: 'AP-DXB-FLR14-02 firmware update available (v8.7.1)', meta: 'DUBAI HQ · ARUBA AP-635 · 09:30:00', delivered: ['Email'], time: '5h ago', status: 'OPEN' },
+    { sev: 'warn', title: 'UPS-DXB-RACK01 battery test recommended', meta: 'DUBAI HQ · APC SMART-UPS · 08:00:00', delivered: ['Email'], time: '7h ago', status: 'OPEN' },
+    { sev: 'critical', title: 'SW-DXB-CORE01 interface Te1/0/24 errors', meta: 'DUBAI HQ · CISCO C9500 · 06:42:11', delivered: ['WhatsApp', 'Email'], time: '8h ago', status: 'RESOLVED' },
+    { sev: 'info', title: 'Scheduled maintenance window starting 22:00 GST', meta: 'ALL SITES · MAINTENANCE · 05:00:00', delivered: ['Email'], time: '10h ago', status: 'RESOLVED' }
+  ];
+
+  const reports = [
+    { icon: '📊', title: 'Monthly Executive Summary', desc: 'Uptime, MTTR, top incidents, capacity trends — for client CFO/CIO review.', period: 'MONTHLY', last: 'APRIL 2026' },
+    { icon: '📈', title: 'SLA Compliance Report', desc: 'Per-site uptime against contracted SLA. Auto-generated for renewals.', period: 'QUARTERLY', last: 'Q1 2026' },
+    { icon: '🔍', title: 'Bandwidth Utilization', desc: 'Trends, peaks, top consumers. Helps justify circuit upgrades.', period: 'WEEKLY', last: 'WK 17' },
+    { icon: '⚠️', title: 'Incident Post-Mortem', desc: 'Detailed root-cause for each critical event. Auto-emails after resolution.', period: 'PER-INCIDENT', last: '14:32 TODAY' },
+    { icon: '🔐', title: 'Asset Inventory', desc: 'Full device list with firmware, warranty, EOL dates. Excel export.', period: 'ON-DEMAND', last: 'YESTERDAY' },
+    { icon: '📅', title: 'Capacity Forecast', desc: 'Projects link saturation 6 months out. Ammunition for budget meetings.', period: 'QUARTERLY', last: 'Q1 2026' }
+  ];
+
+  // === Render functions ===
+  function utilBar(value, label) {
+    let cls = '';
+    if (value > 80) cls = 'critical';
+    else if (value > 60) cls = 'warn';
+    return `<div class="util-bar"><div class="util-bar-track"><div class="util-bar-fill ${cls}" style="width:${value}%;"></div></div><div class="util-bar-text">${value}%</div></div>`;
+  }
+
+  function renderDevicesTable(target, list) {
+    const html = list.map(d => `
+      <tr class="clickable">
+        <td><span class="device-name">${d.name}</span></td>
+        <td><span class="device-type">${d.type}</span></td>
+        ${target === 'devices' ? `<td><span class="device-ip">${d.vendor}</span></td>` : ''}
+        <td><span class="device-ip">${d.site}</span></td>
+        ${target === 'devices' ? `<td><span class="device-ip">${d.ip}</span></td>` : ''}
+        <td><span class="device-status ${d.status === 'critical' ? 'critical' : d.status === 'warn' ? 'warn' : 'healthy'}">${d.status === 'critical' ? 'CRITICAL' : d.status === 'warn' ? 'WARNING' : 'ONLINE'}</span></td>
+        <td>${d.cpu === null ? '<span style="color:var(--text-faint);">—</span>' : utilBar(d.cpu)}</td>
+        <td>${d.mem === null ? '<span style="color:var(--text-faint);">—</span>' : utilBar(d.mem)}</td>
+        ${target === 'dash' ? `<td><span class="device-ip">${d.uptime}</span></td>` : ''}
+      </tr>
+    `).join('');
+    document.getElementById(target === 'dash' ? 'dashDevicesBody' : 'devicesBody').innerHTML = html;
+  }
+
+  function renderSites() {
+    const html = sites.map(s => `
+      <div class="site-card" onclick="navigateTo('devices')">
+        <div class="head">
+          <div>
+            <div class="name">${s.name}</div>
+            <div class="location">${s.loc}</div>
+          </div>
+          <div class="site-status ${s.status}"></div>
+        </div>
+        <div class="stats">
+          <span><span class="num">${s.devices}</span> devices</span>
+          <span>${s.alerts === 0 ? 'No alerts' : `<span class="num">${s.alerts}</span> alert${s.alerts > 1 ? 's' : ''}`}</span>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('sitesGrid').innerHTML = html;
+  }
+
+  function renderAlerts() {
+    const html = alerts.map(a => `
+      <div class="alert-row">
+        <div class="alert-bar ${a.sev}"></div>
+        <div class="alert-text">
+          ${a.title}
+          <div class="meta">${a.meta}</div>
+        </div>
+        <div class="alert-action">
+          DELIVERED: ${a.delivered.map(c => `<span class="delivered">${c}</span>`).join(' · ')}
+        </div>
+        <div class="alert-time">${a.time}</div>
+        <div class="device-status ${a.status === 'OPEN' ? (a.sev === 'critical' ? 'critical' : a.sev === 'warn' ? 'warn' : 'offline') : 'healthy'}">${a.status}</div>
+      </div>
+    `).join('');
+    document.getElementById('alertsBody').innerHTML = html;
+  }
+
+  function renderReports() {
+    const html = reports.map(r => `
+      <div class="report-card">
+        <div class="icon-box" style="font-size:20px;">${r.icon}</div>
+        <div class="title">${r.title}</div>
+        <div class="desc">${r.desc}</div>
+        <div class="footer">
+          <span>${r.period}</span>
+          <span style="color:var(--accent);">${r.last}</span>
+        </div>
+      </div>
+    `).join('');
+    document.getElementById('reportsGrid').innerHTML = html;
+  }
+
+  // === Navigation ===
+  const titles = {
+    dashboard: { title: 'Network Status', crumb: 'DASHBOARD' },
+    sites: { title: 'Client Sites', crumb: 'SITES' },
+    devices: { title: 'All Devices', crumb: 'DEVICES' },
+    topology: { title: 'Network Topology', crumb: 'TOPOLOGY' },
+    alerts: { title: 'Alerts &amp; Incidents', crumb: 'ALERTS' },
+    reports: { title: 'Reports', crumb: 'REPORTS' },
+    settings: { title: 'Configuration', crumb: 'SETTINGS' }
+  };
+
+  function navigateTo(view) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    const targetView = document.getElementById('view-' + view);
+    if (targetView) targetView.classList.add('active');
+    const navItem = document.querySelector(`[data-view="${view}"]`);
+    if (navItem) navItem.classList.add('active');
+    if (titles[view]) {
+      document.getElementById('page-title').innerHTML = titles[view].title;
+      document.getElementById('page-breadcrumb').innerHTML = `<span>ACME CORP UAE</span><span>›</span><span class="accent">${titles[view].crumb}</span>`;
+    }
+    // close mobile sidebar
+    document.getElementById('sidebar').classList.remove('open');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // Wire up nav clicks
+  document.querySelectorAll('.nav-item').forEach(n => {
+    n.addEventListener('click', () => navigateTo(n.getAttribute('data-view')));
+  });
+
+  // Initial render
+  renderDevicesTable('dash', devices.slice(0, 8));
+  renderDevicesTable('devices', devices);
+  renderSites();
+  renderAlerts();
+  renderReports();
+</script>
+
+</body>
+</html>
